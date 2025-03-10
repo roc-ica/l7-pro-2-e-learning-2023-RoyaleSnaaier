@@ -1,0 +1,15 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Only keep essential Leaflet overrides */
+.leaflet-container {
+  @apply w-full h-full rounded-lg;
+}
+
+@layer utilities {
+    .bg-dots {
+        background-image: radial-gradient(circle, #e5e7eb 1px, transparent 1px);
+        background-size: 16px 16px;
+    }
+}
