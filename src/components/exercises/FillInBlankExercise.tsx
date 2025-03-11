@@ -15,10 +15,14 @@ interface Props {
 const FillInBlankExercise: React.FC<Props> = ({ exercise, onSubmit, disabled, previousAttempt }) => {
     const [answer, setAnswer] = useState('');
     const [showAnswer, setShowAnswer] = useState(false);
+    const [hasSubmitted, setHasSubmitted] = useState(false);
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
+        if (disabled || hasSubmitted) return;
+        
         if (answer.trim()) {
+            setHasSubmitted(true); // Lock answer after submission
             onSubmit(answer.trim());
         }
     };
@@ -30,17 +34,20 @@ const FillInBlankExercise: React.FC<Props> = ({ exercise, onSubmit, disabled, pr
                     type="text"
                     value={answer}
                     onChange={(e) => setAnswer(e.target.value)}
-                    disabled={disabled}
+                    disabled={disabled || hasSubmitted}
                     placeholder="Type your answer here..."
-                    className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500
+                        ${hasSubmitted ? 'bg-gray-50' : ''}`}
                 />
-                <button
-                    type="submit"
-                    disabled={!answer.trim() || disabled}
-                    className="px-4 py-2 bg-blue-600 text-white rounded-md disabled:opacity-50"
-                >
-                    Submit Answer
-                </button>
+                {!hasSubmitted && (
+                    <button
+                        type="submit"
+                        disabled={!answer.trim() || disabled}
+                        className="px-4 py-2 bg-blue-600 text-white rounded-md disabled:opacity-50"
+                    >
+                        Submit Answer
+                    </button>
+                )}
             </form>
 
             {disabled && previousAttempt && (

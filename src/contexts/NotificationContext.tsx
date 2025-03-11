@@ -14,6 +14,8 @@ export interface Notification {
 }
 
 interface NotificationContextType {
+    showError: (message: string) => void;
+    showSuccess: (message: string) => void;
     notifications: Notification[];
     unreadCount: number;
     addNotification: (notification: Omit<Notification, 'id' | 'isRead' | 'timestamp'>) => void;
@@ -134,7 +136,9 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
             addWelcomeNotification,
             markAsRead,
             markAllAsRead,
-            clearAll
+            clearAll,
+            showError: (message: string) => addNotification({ type: 'system', message }),
+            showSuccess: (message: string) => addNotification({ type: 'system', message })
         }}>
             {children}
         </NotificationContext.Provider>

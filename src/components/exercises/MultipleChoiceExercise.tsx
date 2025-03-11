@@ -15,11 +15,14 @@ interface Props {
 const MultipleChoiceExercise: React.FC<Props> = ({ exercise, onSubmit, disabled, previousAttempt }) => {
     const [selectedOption, setSelectedOption] = useState<string>('');
     const [showAnswer, setShowAnswer] = useState(false);
+    const [hasSubmitted, setHasSubmitted] = useState(false);
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        if (disabled) return;
+        if (disabled || hasSubmitted) return;
+        
         if (selectedOption) {
+            setHasSubmitted(true); // Lock answer after submission
             if (typeof onSubmit === 'function') {
                 onSubmit(selectedOption);
             }
@@ -31,27 +34,36 @@ const MultipleChoiceExercise: React.FC<Props> = ({ exercise, onSubmit, disabled,
             <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="space-y-2">
                     {exercise.options?.map((option) => (
-                        <label key={option.option_id} className="flex items-center space-x-3">
+                        <label 
+                            key={option.option_id} 
+                            className={`flex items-center space-x-3 p-2 rounded-md ${
+                                hasSubmitted && selectedOption === option.option_text 
+                                    ? 'bg-gray-100' 
+                                    : ''
+                            }`}
+                        >
                             <input
                                 type="radio"
                                 name="answer"
                                 value={option.option_text}
                                 checked={selectedOption === option.option_text}
                                 onChange={(e) => setSelectedOption(e.target.value)}
-                                disabled={disabled}
+                                disabled={disabled || hasSubmitted}
                                 className="form-radio h-4 w-4 text-blue-600"
                             />
                             <span className="text-gray-700">{option.option_text}</span>
                         </label>
                     ))}
                 </div>
-                <button
-                    type="submit"
-                    disabled={!selectedOption || disabled}
-                    className="px-4 py-2 bg-blue-600 text-white rounded-md disabled:opacity-50"
-                >
-                    Submit Answer
-                </button>
+                {!hasSubmitted && (
+                    <button
+                        type="submit"
+                        disabled={!selectedOption || disabled}
+                        className="px-4 py-2 bg-blue-600 text-white rounded-md disabled:opacity-50"
+                    >
+                        Submit Answer
+                    </button>
+                )}
             </form>
 
             {disabled && previousAttempt && (
