@@ -2,18 +2,22 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { motion, useAnimation } from 'framer-motion';
 import { useInView } from 'react-intersection-observer';
-import { FaStar, FaUsers, FaClock } from 'react-icons/fa';
+import { FaStar, FaUsers, FaClock, FaGraduationCap, FaTags, FaBookmark } from 'react-icons/fa';
 import { useCourses } from '../../hooks/useCourses';
 
 const CourseCard: React.FC<{ course: any; index: number }> = ({ course, index }) => {
     const controls = useAnimation();
     const [ref, inView] = useInView();
+    const [isHovered] = React.useState(false);
 
     React.useEffect(() => {
         if (inView) {
             controls.start('visible');
         }
     }, [controls, inView]);
+
+    // Generate random rating between 4.0 and 5.0 for demo purposes
+    const rating = React.useMemo(() => (4 + Math.random()).toFixed(1), []);
 
     return (
         <motion.div
@@ -28,34 +32,60 @@ const CourseCard: React.FC<{ course: any; index: number }> = ({ course, index })
                 },
                 hidden: { opacity: 0, y: 50 }
             }}
-            className="bg-white rounded-xl shadow-lg overflow-hidden transform hover:scale-105 transition-all duration-300"
+            className="bg-white rounded-xl shadow-lg overflow-hidden transform transition-all duration-300"
+            style={{
+                boxShadow: isHovered ? '0 15px 30px rgba(0,0,0,0.15)' : '0 5px 15px rgba(0,0,0,0.05)'
+            }}
+            whileHover={{
+                scale: 1.03,
+            }}
         >
             <div className="relative">
-                <img
-                    src={course.image_url || '/images/placeholder.jpg'}
-                    alt={course.title}
-                    className="w-full h-48 object-cover"
-                />
-                <div className="absolute top-4 right-4 bg-white px-3 py-1 rounded-full text-sm font-semibold text-blue-600">
+                {/* Course image with gradient overlay */}
+                <div className="relative h-52">
+                    <img
+                        src={course.image_url || '/images/placeholder.jpg'}
+                        alt={course.title}
+                        className="w-full h-full object-cover"
+                    />
+                    <div className={`absolute inset-0 bg-gradient-to-t from-black/70 to-transparent transition-opacity duration-300 ${isHovered ? 'opacity-70' : 'opacity-40'}`}></div>
+                </div>
+
+                {/* Category badge */}
+                <div className="absolute top-4 right-4 bg-blue-600 px-3 py-1 rounded-full text-sm font-semibold text-white shadow-lg">
                     {course.difficulty_level}
                 </div>
             </div>
             
             <div className="p-6">
-                <h3 className="text-xl font-bold mb-2">{course.title}</h3>
-                <p className="text-gray-600 mb-4">{course.description}</p>
-                
-                <div className="flex items-center text-gray-600 mb-4">
-                    <FaUsers className="mr-2" />
-                    <span>{course.total_lessons} lessons</span>
-                    <FaClock className="ml-4 mr-2" />
-                    <span>{course.total_exercises} exercises</span>
+                <div className="flex items-center justify-between mb-2">
+                    <span className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">
+                        <FaTags className="inline mr-1" />
+                        {course.category || 'Development'}
+                    </span>
+                    <span className="text-green-600 font-bold">
+                        {course.price ? `$${course.price}` : 'Free'}
+                    </span>
                 </div>
                 
+                <h3 className="text-xl font-bold mb-2 line-clamp-2">{course.title}</h3>
+                <p className="text-gray-600 mb-4 line-clamp-2 text-sm">{course.description}</p>
+                
+                <div className="flex justify-between text-gray-600 mb-5 text-sm">
+                    <div className="flex items-center">
+                        <FaUsers className="mr-2 text-blue-500" />
+                        <span>{course.total_lessons} lessons</span>
+                    </div>
+                    <div className="flex items-center">
+                        <FaClock className="mr-2 text-blue-500" />
+                        <span>{course.total_exercises} exercises</span>
+                    </div>
+                </div>
+            
                 <div className="flex items-center justify-between">
                     <Link
                         to={`/courses/${course.course_id}`}
-                        className="w-full px-6 py-2 bg-blue-600 text-white text-center rounded-full hover:bg-blue-700 transition-colors"
+                        className="w-full px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-center rounded-full font-medium hover:from-blue-700 hover:to-indigo-700 transition-colors shadow-md"
                     >
                         View Course
                     </Link>
