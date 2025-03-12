@@ -124,6 +124,7 @@ CREATE TABLE user_settings (
     learning_reminders BOOLEAN DEFAULT TRUE,
     preferred_difficulty VARCHAR(20) DEFAULT 'Beginner',
     daily_goal_minutes INT DEFAULT 30,
+    dyslexic_preference BOOLEAN DEFAULT FALSE,
     theme VARCHAR(20) DEFAULT 'light',
     FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
 );

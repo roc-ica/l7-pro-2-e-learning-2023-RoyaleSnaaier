@@ -1,5 +1,5 @@
 import React from 'react';
-import { UserAchievement } from '../../types/Achievement';
+import { UserAchievement } from '../../../../types/Achievement';
 import { formatDistance } from 'date-fns';
 import { 
     TrophyIcon, 
@@ -11,7 +11,7 @@ import {
     ClockIcon,
     CalendarIcon,
 } from '@heroicons/react/24/outline';
-import { rarityColors } from '../../constants/achievement';
+import { rarityColors } from '../../../../constants/achievement';
 
 interface Props {
     achievement: UserAchievement;

@@ -1,8 +1,8 @@
 import React from 'react';
-import { UserAchievement } from '../../types/Achievement';
+import { UserAchievement } from '../../../../types/Achievement';
 import { TrophyIcon, LockClosedIcon } from '@heroicons/react/24/outline';
 import { motion } from 'framer-motion';
-import { rarityColors } from '../../constants/achievement';
+import { rarityColors } from '../../../../constants/achievement';
 
 interface Props {
     achievement: UserAchievement;

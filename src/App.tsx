@@ -2,21 +2,21 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
 import { NotificationProvider } from './contexts/NotificationContext';
-import { SectionProvider } from './context/SectionContext';
+import { SectionProvider } from './contexts/SectionContext';
 import Navbar from './components/common/Navbar';
 import Footer from './components/common/Footer';
-import LandingPage from './pages/LandingPage';
+import LandingPage from './pages/landings_page/LandingPage';
 import LoginPage from './pages/auth/LoginPage';
 import RegisterPage from './pages/auth/RegisterPage';
 import Dashboard from './pages/user/Dashboard';
-import LessonPage from './pages/learning/LessonPage';
-import RoadmapPage from './pages/learning/RoadmapPage';
+import LessonPage from './pages/learning/lesson_Page/LessonPage';
+import RoadmapPage from './pages/learning/roadmap_page/RoadmapPage';
 import CoursesPage from './pages/courses/CoursesPage';
 import CourseDetailPage from './pages/courses/CourseDetailPage';
 import PrivateRoute from './components/layout/PrivateRoute';
 import ProfilePage from './pages/profile/ProfilePage';
 import SettingsPage from './pages/profile/SettingsPage';
-import Achievements from './pages/Achievements';
+import Achievements from './pages/Achievements_page/Achievements';
 
 const App: React.FC = () => {
   return (

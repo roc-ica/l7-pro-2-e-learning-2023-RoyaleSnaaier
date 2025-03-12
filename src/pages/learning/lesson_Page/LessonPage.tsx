@@ -1,53 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useAuth } from '../../contexts/AuthContext';
-import { useNotifications } from '../../contexts/NotificationContext';
-import MultipleChoiceExercise from '../../components/exercises/MultipleChoiceExercise';
-import FillInBlankExercise from '../../components/exercises/FillInBlankExercise';
-import api from '../../services/api';
-import LessonComplete from '../../components/lessons/LessonComplete';
-import LessonReview from '../../components/lessons/LessonReview';
-
-// Define types for our component
-interface ExerciseHistoryItem {
-    exercise_id: number;
-    question: string;
-    user_answer: string;
-    correct_answer: string;
-    is_correct: boolean;
-    attempted_at: string;
-}
-
-interface LessonCompletion {
-    total_exercises: number;
-    correct_answers: number;
-    total_points: number;
-    lesson_title: string;
-    next_lesson_id: number | null;
-    exercise_history?: ExerciseHistoryItem[];
-}
-
-interface Exercise {
-    exercise_id: number;
-    lesson_id: number;
-    question: string;
-    correct_answer: string;
-    exercise_type: "Multiple Choice" | "Fill in the blank" | "Writing";
-    points: number;
-    options?: Array<{
-        option_id: number;
-        exercise_id: number;
-        option_text: string;
-        is_correct: boolean;
-    }>;
-}
-
-interface Lesson {
-    lesson_id: number;
-    title: string;
-    content: string;
-    exercises: Exercise[];
-}
+import { useAuth } from '../../../contexts/AuthContext';
+import { useNotifications } from '../../../contexts/NotificationContext';
+import api from '../../../services/api';
+import LessonComplete from '../../../components/lessons/LessonComplete';
+import LessonReview from '../../../components/lessons/LessonReview';
+import { Lesson, LessonCompletion, ExerciseHistoryItem } from './types/lessonTypes';
+import ProgressBar from './components/ProgressBar';
+import LessonContent from './components/LessonContent';
+import LessonExercise from './components/LessonExercise';
 
 const LessonPage: React.FC = () => {
     const { lessonId } = useParams<{ lessonId: string }>();
@@ -114,7 +75,7 @@ const LessonPage: React.FC = () => {
                             
                             // Check if all exercises are completed
                             const allExercisesCompleted = lessonResponse.lesson.exercises.every(
-                                (ex: Exercise) => completedExercises[ex.exercise_id] === true
+                                (ex) => completedExercises[ex.exercise_id] === true
                             );
                             
                             if (allExercisesCompleted) {
@@ -126,7 +87,7 @@ const LessonPage: React.FC = () => {
                                 
                                 // Find the first uncompleted exercise to show
                                 const nextExerciseIndex = lessonResponse.lesson.exercises.findIndex(
-                                    (ex: Exercise) => !completedExercises[ex.exercise_id]
+                                    (ex) => !completedExercises[ex.exercise_id]
                                 );
                                 if (nextExerciseIndex !== -1) {
                                     setCurrentExerciseIndex(nextExerciseIndex);
@@ -187,10 +148,7 @@ const LessonPage: React.FC = () => {
                     notifications.showSuccess('Correct answer!');
                 } else {
                     notifications.showError('Incorrect answer.');
-                    // No longer suggest "try again"
                 }
-                
-                // No automatic advancement - user must click next button
             }
         } catch (err) {
             console.error('Error submitting answer:', err);
@@ -254,129 +212,6 @@ const LessonPage: React.FC = () => {
     // Return to lesson completion screen
     const handleBackToResults = () => {
         setReviewMode(false);
-    };
-
-    // Render functions for different parts of the UI
-    const renderProgressBar = () => {
-        return (
-            <div className="w-full bg-gray-200 rounded-full h-2.5 mb-6">
-                <div 
-                    className="bg-green-600 h-2.5 rounded-full transition-all duration-500 ease-out"
-                    style={{ width: `${progressPercentage}%` }}
-                ></div>
-            </div>
-        );
-    };
-
-    const renderExerciseNavigation = () => {
-        if (!lesson) return null;
-        
-        return (
-            <div className="flex items-center justify-between mb-6">
-                <div className="flex items-center">
-                    <span className="text-sm font-medium text-gray-500">
-                        Exercise {currentExerciseIndex + 1} of {lesson.exercises.length}
-                    </span>
-                </div>
-                <div className="flex items-center space-x-2">
-                    {lesson.exercises.map((_, idx) => (
-                        <button
-                            key={idx}
-                            onClick={() => setCurrentExerciseIndex(idx)}
-                            className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-medium
-                                ${currentExerciseIndex === idx 
-                                    ? 'bg-blue-600 text-white' 
-                                    : exerciseResults[lesson.exercises[idx].exercise_id]
-                                        ? 'bg-green-500 text-white'
-                                        : 'bg-gray-200 text-gray-600'
-                                }`}
-                        >
-                            {idx + 1}
-                        </button>
-                    ))}
-                </div>
-            </div>
-        );
-    };
-
-    const renderExercise = (exercise: Exercise) => {
-        const isAnswered = answeredExercise === exercise.exercise_id;
-        const isAlreadyCompleted = exercise.exercise_id in exerciseResults;
-        const showNextButton = isAnswered || isAlreadyCompleted;
-        const isLastExercise = currentExerciseIndex === (lesson?.exercises.length || 0) - 1;
-        
-        switch (exercise.exercise_type) {
-            case 'Multiple Choice':
-                return (
-                    <div className="space-y-6">
-                        <MultipleChoiceExercise
-                            exercise={exercise}
-                            onSubmit={handleSubmitAnswer}
-                            disabled={isAlreadyCompleted}
-                            previousAttempt={
-                                completion?.exercise_history?.find(h => h.exercise_id === exercise.exercise_id)
-                            }
-                        />
-                        
-                        {isAnswered && (
-                            <div className={`p-4 rounded-lg ${isAnswerCorrect ? 'bg-green-100' : 'bg-red-100'}`}>
-                                <p className={`font-medium ${isAnswerCorrect ? 'text-green-700' : 'text-red-700'}`}>
-                                    {isAnswerCorrect 
-                                        ? 'Correct! Well done.' 
-                                        : `Incorrect. The correct answer is: ${exercise.correct_answer}`
-                                    }
-                                </p>
-                            </div>
-                        )}
-                        
-                        {showNextButton && (
-                            <button
-                                onClick={handleNextExercise}
-                                className="w-full px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition"
-                            >
-                                {isLastExercise ? 'Complete Lesson' : 'Next Exercise'}
-                            </button>
-                        )}
-                    </div>
-                );
-            
-            case 'Fill in the blank':
-                return (
-                    <div className="space-y-6">
-                        <FillInBlankExercise
-                            exercise={exercise}
-                            onSubmit={handleSubmitAnswer}
-                            disabled={isAlreadyCompleted}
-                            previousAttempt={
-                                completion?.exercise_history?.find(h => h.exercise_id === exercise.exercise_id)
-                            }
-                        />
-                        
-                        {isAnswered && (
-                            <div className={`p-4 rounded-lg ${isAnswerCorrect ? 'bg-green-100' : 'bg-red-100'}`}>
-                                <p className={`font-medium ${isAnswerCorrect ? 'text-green-700' : 'text-red-700'}`}>
-                                    {isAnswerCorrect 
-                                        ? 'Correct! Well done.' 
-                                        : `Incorrect. The correct answer is: ${exercise.correct_answer}`
-                                    }
-                                </p>
-                            </div>
-                        )}
-                        
-                        {showNextButton && (
-                            <button
-                                onClick={handleNextExercise}
-                                className="w-full px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition"
-                            >
-                                {isLastExercise ? 'Complete Lesson' : 'Next Exercise'}
-                            </button>
-                        )}
-                    </div>
-                );
-                
-            default:
-                return <div>Unsupported exercise type</div>;
-        }
     };
 
     // Render different views based on state
@@ -453,42 +288,31 @@ const LessonPage: React.FC = () => {
         );
     }
 
-    const currentExercise = lesson.exercises[currentExerciseIndex];
-
     return (
         <div className="max-w-4xl mx-auto px-4 py-8">
-            {renderProgressBar()}
+            <ProgressBar progressPercentage={progressPercentage} />
             
-            <div className="flex justify-between items-center mb-6">
-                <h1 className="text-3xl font-bold">{lesson.title}</h1>
-            </div>
+            <LessonContent title={lesson.title} content={lesson.content} />
             
             <div className="bg-white rounded-lg shadow-md p-6 mb-8">
-                <div className="prose max-w-none mb-6">
-                    {lesson.content}
-                </div>
-                
-                <div className="border-t border-gray-200 pt-6">
-                    <h2 className="text-2xl font-bold mb-2">Exercises</h2>
-                    <p className="text-gray-600 mb-6">
-                        Complete the following exercises to master this lesson.
-                    </p>
-                    
-                    {renderExerciseNavigation()}
-                    
-                    {lesson.exercises && lesson.exercises.length > 0 ? (
-                        <div className="bg-gray-50 p-6 rounded-lg">
-                            <h3 className="text-xl font-bold mb-4">
-                                {currentExercise.question}
-                            </h3>
-                            {renderExercise(currentExercise)}
-                        </div>
-                    ) : (
-                        <div className="text-center py-8 text-gray-500">
-                            No exercises available for this lesson.
-                        </div>
-                    )}
-                </div>
+                {lesson.exercises && lesson.exercises.length > 0 ? (
+                    <LessonExercise
+                        exercises={lesson.exercises}
+                        currentExerciseIndex={currentExerciseIndex}
+                        exerciseResults={exerciseResults}
+                        answeredExercise={answeredExercise}
+                        isAnswerCorrect={isAnswerCorrect}
+                        exerciseHistory={completion?.exercise_history}
+                        isLastExercise={currentExerciseIndex === lesson.exercises.length - 1}
+                        onExerciseSelect={setCurrentExerciseIndex}
+                        onSubmitAnswer={handleSubmitAnswer}
+                        onNextExercise={handleNextExercise}
+                    />
+                ) : (
+                    <div className="text-center py-8 text-gray-500">
+                        No exercises available for this lesson.
+                    </div>
+                )}
             </div>
         </div>
     );

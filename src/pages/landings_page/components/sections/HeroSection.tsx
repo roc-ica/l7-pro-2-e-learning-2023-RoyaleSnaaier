@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import WaveDecoration from '../common/WaveDecoration';
+import WaveDecoration from '../../../../components/common/WaveDecoration';
 
 const HeroSection: React.FC = () => (
     <div className="relative bg-gradient-to-r from-blue-600 to-purple-600 text-white overflow-hidden pb-16">

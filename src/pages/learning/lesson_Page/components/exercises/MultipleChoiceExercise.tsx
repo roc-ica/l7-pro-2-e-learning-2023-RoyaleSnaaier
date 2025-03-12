@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Exercise, ExerciseOption } from '../../types/exercise';
+import { Exercise, ExerciseOption } from '../../../../../types/exercise';
 
 interface Props {
     exercise: Exercise;

@@ -48,7 +48,6 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
         if (Notification.permission === 'granted') {
             new Notification(notification.message, {
                 body: notification.description,
-                icon: '/icons/notification.png'
             });
         }
     };

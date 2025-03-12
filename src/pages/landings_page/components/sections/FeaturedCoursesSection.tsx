@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { motion, useAnimation } from 'framer-motion';
 import { useInView } from 'react-intersection-observer';
 import { FaStar, FaUsers, FaClock, FaGraduationCap, FaTags, FaBookmark } from 'react-icons/fa';
-import { useCourses } from '../../hooks/useCourses';
+import { useCourses } from '../../../../hooks/useCourses';
 
 const CourseCard: React.FC<{ course: any; index: number }> = ({ course, index }) => {
     const controls = useAnimation();
@@ -61,7 +61,7 @@ const CourseCard: React.FC<{ course: any; index: number }> = ({ course, index })
                 <div className="flex items-center justify-between mb-2">
                     <span className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">
                         <FaTags className="inline mr-1" />
-                        {course.category || 'Development'}
+                        {course.category || 'Catagory'}
                     </span>
                     <span className="text-green-600 font-bold">
                         {course.price ? `$${course.price}` : 'Free'}
