@@ -60,11 +60,134 @@ interface AchievementsResponse {
     message?: string;
 }
 
-const API_BASE_URL = 'http://localhost:8000/api';
+// Base API URL configuration
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
+
+// Course-related API calls
+const courseAPI = {
+  getCourses: async () => {
+    const response = await fetch(`${API_BASE_URL}/api/courses/get_courses.php`);
+    return response.json();
+  },
+  
+  getCourse: async (id: number) => {
+    const response = await fetch(`${API_BASE_URL}/api/courses/get_course.php?id=${id}`);
+    return response.json();
+  },
+  
+  createCourse: async (courseData: any) => {
+    const response = await fetch(`${API_BASE_URL}/api/courses/create_course.php`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(courseData),
+    });
+    return response.json();
+  },
+  
+  updateCourse: async (courseData: any) => {
+    const response = await fetch(`${API_BASE_URL}/api/courses/update_course.php`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(courseData),
+    });
+    return response.json();
+  },
+  
+  deleteCourse: async (courseId: number, userId: number) => {
+    const response = await fetch(`${API_BASE_URL}/api/courses/delete_course.php`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ course_id: courseId, user_id: userId }),
+    });
+    return response.json();
+  },
+
+  createLesson: async (lessonData: any) => {
+    const response = await fetch(`${API_BASE_URL}/api/courses/create_lesson.php`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(lessonData),
+    });
+    return response.json();
+  },
+  
+  updateLesson: async (lessonData: any) => {
+    const response = await fetch(`${API_BASE_URL}/api/courses/update_lesson.php`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(lessonData),
+    });
+    return response.json();
+  },
+  
+  deleteLesson: async (data: { lesson_id: number, user_id: number }) => {
+    const response = await fetch(`${API_BASE_URL}/api/courses/delete_lesson.php`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+    return response.json();
+  },
+
+  createExercise: async (exerciseData: any) => {
+    const response = await fetch(`${API_BASE_URL}/api/courses/create_exercise.php`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(exerciseData),
+    });
+    return response.json();
+  },
+  
+  updateExercise: async (exerciseData: any) => {
+    const response = await fetch(`${API_BASE_URL}/api/courses/update_exercise.php`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(exerciseData),
+    });
+    return response.json();
+  },
+  
+  deleteExercise: async (data: { exercise_id: number, user_id: number }) => {
+    const response = await fetch(`${API_BASE_URL}/api/courses/delete_exercise.php`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+    return response.json();
+  },
+  
+  getCourseStudents: async (courseId: number, userId: number) => {
+    const response = await fetch(`${API_BASE_URL}/api/courses/get_course_students.php?course_id=${courseId}&user_id=${userId}`);
+    return response.json();
+  },
+
+  getUserCourses: async (userId: number) => {
+    const response = await fetch(`${API_BASE_URL}/api/courses/get_user_courses.php?user_id=${userId}`);
+    return response.json();
+  },
+};
 
 const api = {
     login: async (email: string, password: string): Promise<LoginResponse> => {
-        const response = await fetch(`${API_BASE_URL}/auth/login.php`, {
+        const response = await fetch(`${API_BASE_URL}/api/auth/login.php`, {
             method: 'POST',
             headers: { 
                 'Content-Type': 'application/json',
@@ -78,7 +201,7 @@ const api = {
     },
 
     register: async (username: string, email: string, password: string): Promise<RegisterResponse> => {
-        const response = await fetch(`${API_BASE_URL}/auth/register.php`, {
+        const response = await fetch(`${API_BASE_URL}/api/auth/register.php`, {
             method: 'POST',
             headers: { 
                 'Content-Type': 'application/json',
@@ -92,7 +215,7 @@ const api = {
     },
 
     getCourses: async (): Promise<CoursesResponse> => {
-        const response = await fetch(`${API_BASE_URL}/courses/get_courses.php`, {
+        const response = await fetch(`${API_BASE_URL}/api/courses/get_courses.php`, {
             credentials: 'include',
             mode: 'cors'
         });
@@ -101,7 +224,7 @@ const api = {
 
     getUserProgress: async (userId: number): Promise<UserProgressResponse> => {
         try {
-            const response = await fetch(`${API_BASE_URL}/user/get_progress.php?user_id=${userId}`, {
+            const response = await fetch(`${API_BASE_URL}/api/user/get_progress.php?user_id=${userId}`, {
                 credentials: 'include',
                 mode: 'cors',
                 headers: {
@@ -142,7 +265,7 @@ const api = {
     },
 
     getCourseDetails: async (courseId: number, userId?: number): Promise<CourseDetailsResponse> => {
-        const url = new URL(`${API_BASE_URL}/courses/get_course.php`);
+        const url = new URL(`${API_BASE_URL}/api/courses/get_course.php`);
         url.searchParams.append('id', courseId.toString());
         if (userId) {
             url.searchParams.append('user_id', userId.toString());
@@ -156,7 +279,7 @@ const api = {
     },
 
     getCourseLessons: async (courseId: number): Promise<CourseDetailsResponse> => {
-        const response = await fetch(`${API_BASE_URL}/courses/get_lessons.php?course_id=${courseId}`, {
+        const response = await fetch(`${API_BASE_URL}/api/courses/get_lessons.php?course_id=${courseId}`, {
             credentials: 'include',
             mode: 'cors'
         });
@@ -164,7 +287,7 @@ const api = {
     },
 
     getLesson: async (lessonId: number): Promise<LessonResponse> => {
-        const response = await fetch(`${API_BASE_URL}/lessons/get_lesson.php?id=${lessonId}`, {
+        const response = await fetch(`${API_BASE_URL}/api/lessons/get_lesson.php?id=${lessonId}`, {
             credentials: 'include',
             mode: 'cors'
         });
@@ -172,7 +295,7 @@ const api = {
     },
 
     submitExercise: async (data: { exercise_id: number; user_id: number; answer: string }): Promise<any> => {
-        const response = await fetch(`${API_BASE_URL}/exercises/submit_answer.php`, {
+        const response = await fetch(`${API_BASE_URL}/api/exercises/submit_answer.php`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(data),
@@ -183,7 +306,7 @@ const api = {
     },
 
     getLessonCompletion: async (lessonId: number, userId: number): Promise<any> => {
-        const response = await fetch(`${API_BASE_URL}/lessons/get_completion.php?lesson_id=${lessonId}&user_id=${userId}`, {
+        const response = await fetch(`${API_BASE_URL}/api/lessons/get_completion.php?lesson_id=${lessonId}&user_id=${userId}`, {
             credentials: 'include',
             mode: 'cors'
         });
@@ -192,7 +315,7 @@ const api = {
 
     getCourseProgress: async (userId: number): Promise<any> => {
         try {
-            const response = await fetch(`${API_BASE_URL}/user/get_course_progress.php?user_id=${userId}`, {
+            const response = await fetch(`${API_BASE_URL}/api/user/get_course_progress.php?user_id=${userId}`, {
                 credentials: 'include',
                 mode: 'cors',
                 headers: {
@@ -227,7 +350,7 @@ const api = {
     },
 
     getRoadmap: async (userId: number): Promise<any> => {
-        const response = await fetch(`${API_BASE_URL}/user/get_roadmap.php?user_id=${userId}`, {
+        const response = await fetch(`${API_BASE_URL}/api/user/get_roadmap.php?user_id=${userId}`, {
             credentials: 'include',
             mode: 'cors'
         });
@@ -235,7 +358,7 @@ const api = {
     },
 
     resetLessonProgress: async (userId: number, lessonId: number): Promise<any> => {
-        const response = await fetch(`${API_BASE_URL}/lessons/reset_progress.php`, {
+        const response = await fetch(`${API_BASE_URL}/api/lessons/reset_progress.php`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ user_id: userId, lesson_id: lessonId }),
@@ -247,7 +370,7 @@ const api = {
 
     getUserProfile: async (userId: number | undefined): Promise<UserProfileResponse> => {
         if (!userId) throw new Error('User ID is required');
-        const response = await fetch(`${API_BASE_URL}/users/get_profile.php?user_id=${userId}`, {
+        const response = await fetch(`${API_BASE_URL}/api/users/get_profile.php?user_id=${userId}`, {
             credentials: 'include',
             mode: 'cors'
         });
@@ -290,7 +413,7 @@ const api = {
         };
     }): Promise<UpdateUserSettingsResponse> => {
         if (!data.userId) throw new Error('User ID is required');
-        const response = await fetch(`${API_BASE_URL}/users/update_settings.php`, {
+        const response = await fetch(`${API_BASE_URL}/api/users/update_settings.php`, {
             method: 'POST',
             headers: { 
                 'Content-Type': 'application/json',
@@ -305,7 +428,7 @@ const api = {
 
     updateProfile: async (data: UpdateProfileData): Promise<{ status: string; error?: string }> => {
         if (!data.userId) throw new Error('User ID is required');
-        const response = await fetch(`${API_BASE_URL}/users/update_profile.php`, {
+        const response = await fetch(`${API_BASE_URL}/api/users/update_profile.php`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -319,7 +442,7 @@ const api = {
     },
 
     getAchievements: async (userId: number): Promise<AchievementsResponse> => {
-        const response = await fetch(`${API_BASE_URL}/user/get_achievements.php?user_id=${userId}`, {
+        const response = await fetch(`${API_BASE_URL}/api/user/get_achievements.php?user_id=${userId}`, {
             credentials: 'include',
             mode: 'cors'
         });
@@ -329,7 +452,7 @@ const api = {
     getPreviousLessonStatus: async (lessonId: number, userId: number) => {
         try {
             // Remove the extra 'api' from the URL path
-            const response = await fetch(`${API_BASE_URL}/lessons/check_previous_lesson.php?lesson_id=${lessonId}&user_id=${userId}`, {
+            const response = await fetch(`${API_BASE_URL}/api/lessons/check_previous_lesson.php?lesson_id=${lessonId}&user_id=${userId}`, {
                 credentials: 'include', // Add these options for CORS
                 mode: 'cors'
             });
@@ -342,7 +465,7 @@ const api = {
     },
 
     enrollInCourse: async (userId: number, courseId: number): Promise<any> => {
-        const response = await fetch(`${API_BASE_URL}/courses/enroll_course.php`, {
+        const response = await fetch(`${API_BASE_URL}/api/courses/enroll_course.php`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ user_id: userId, course_id: courseId }),
@@ -353,7 +476,7 @@ const api = {
     },
 
     getEnrolledCourses: async (userId: number): Promise<any> => {
-        const response = await fetch(`${API_BASE_URL}/user/get_enrolled_courses.php?user_id=${userId}`, {
+        const response = await fetch(`${API_BASE_URL}/api/user/get_enrolled_courses.php?user_id=${userId}`, {
             credentials: 'include',
             mode: 'cors'
         });
@@ -361,4 +484,7 @@ const api = {
     },
 };
 
-export default api;
+export default {
+  ...api,
+  ...courseAPI,
+};

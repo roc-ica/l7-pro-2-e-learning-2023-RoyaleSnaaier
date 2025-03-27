@@ -12,7 +12,7 @@ const CoursesPage: React.FC = () => {
     const [progress, setProgress] = useState<Record<number, CourseProgress>>({});
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const { user } = useAuth();
+    const { user, isLoggedIn } = useAuth();
 
     useEffect(() => {
         const fetchCourses = async () => {
@@ -109,6 +109,20 @@ const CoursesPage: React.FC = () => {
                     </button>
                 ))}
             </div>
+
+            {isLoggedIn && (
+                <div className="flex justify-end mb-8">
+                    <Link 
+                        to="/create-course"
+                        className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md transition-colors flex items-center"
+                    >
+                        <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
+                        </svg>
+                        Create Course
+                    </Link>
+                </div>
+            )}
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 {filteredCourses.map((course) => {

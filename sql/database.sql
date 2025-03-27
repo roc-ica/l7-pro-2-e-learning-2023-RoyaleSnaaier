@@ -8,6 +8,7 @@ DROP TABLE IF EXISTS exercise_options;
 DROP TABLE IF EXISTS exercises;
 DROP TABLE IF EXISTS user_progress;
 DROP TABLE IF EXISTS lessons;
+DROP TABLE IF EXISTS course_enrollments;
 DROP TABLE IF EXISTS courses;
 DROP TABLE IF EXISTS user_settings;
 DROP TABLE IF EXISTS user_profiles;
@@ -32,7 +33,10 @@ CREATE TABLE courses (
     difficulty_level ENUM('Beginner', 'Intermediate', 'Advanced') NOT NULL,
     image_url VARCHAR(255) DEFAULT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    status ENUM('active', 'draft', 'archived') DEFAULT 'active'
+    status ENUM('active', 'draft', 'archived') DEFAULT 'active',
+    creator_id INT NULL,
+    is_public BOOLEAN DEFAULT TRUE,
+    FOREIGN KEY (creator_id) REFERENCES users(user_id) ON DELETE SET NULL
 );
 
 CREATE TABLE lessons (
@@ -76,7 +80,8 @@ CREATE TABLE user_progress (
     score INT DEFAULT 0,
     completed_at TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(user_id),
-    FOREIGN KEY (lesson_id) REFERENCES lessons(lesson_id)
+    FOREIGN KEY (lesson_id) REFERENCES lessons(lesson_id),
+    UNIQUE KEY unique_user_lesson (user_id, lesson_id)
 );
 
 -- User Exercise Attempts table

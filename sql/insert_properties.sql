@@ -7,14 +7,30 @@ TRUNCATE TABLE exercise_options;
 TRUNCATE TABLE exercises;
 TRUNCATE TABLE user_progress;
 TRUNCATE TABLE lessons;
+TRUNCATE TABLE course_enrollments;
 TRUNCATE TABLE courses;
-TRUNCATE TABLE users;
-TRUNCATE TABLE user_profiles;
 TRUNCATE TABLE user_settings;
+TRUNCATE TABLE user_profiles;
+TRUNCATE TABLE users;
 TRUNCATE TABLE achievement_history;
 TRUNCATE TABLE user_achievements;
 TRUNCATE TABLE achievements;
 SET FOREIGN_KEY_CHECKS = 1;
+
+-- Insert demo users first to ensure they exist for references
+INSERT INTO users (user_id, username, email, password_hash, created_at) VALUES
+(1, 'admin', 'admin@example.com', '$2y$10$F.MmKQgVSFVD6DUqE3ra4OV9tiVsy25MUSPVULSXM3yF8QgBcP/Wa', NOW()),
+(2, 'student', 'student@example.com', '$2y$10$F.MmKQgVSFVD6DUqE3ra4OV9tiVsy25MUSPVULSXM3yF8QgBcP/Wa', NOW()),
+(3, 'teacher', 'teacher@example.com', '$2y$10$F.MmKQgVSFVD6DUqE3ra4OV9tiVsy25MUSPVULSXM3yF8QgBcP/Wa', NOW());
+
+-- Create default profiles for users
+INSERT INTO user_profiles (user_id, first_name, last_name, bio, language_preference, interests) VALUES 
+(1, 'Admin', 'User', 'Site administrator', 'en', '[]'),
+(2, 'Student', 'User', 'Learning enthusiast', 'en', '[]'),
+(3, 'Teacher', 'User', 'Educational professional', 'en', '[]');
+
+-- Create default settings for users
+INSERT INTO user_settings (user_id) VALUES (1), (2), (3);
 
 -- Insert courses with proper structure
 INSERT INTO courses (title, description, difficulty_level, image_url) VALUES
@@ -24,6 +40,11 @@ INSERT INTO courses (title, description, difficulty_level, image_url) VALUES
 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=800&auto=format&fit=crop&q=60'),
 ('Advanced Writing', 'Perfect your written English with advanced grammar, style, and composition techniques.', 'Advanced',
 'https://images.unsplash.com/photo-1455390582262-044cdead277a?w=800&auto=format&fit=crop&q=60');
+
+-- Insert a user-created course example
+INSERT INTO courses (title, description, difficulty_level, image_url, creator_id, status, is_public) VALUES
+('Custom JavaScript Course', 'A user-created course teaching JavaScript fundamentals', 'Intermediate', 
+'https://images.unsplash.com/photo-1587620962725-abab7fe55159?w=800&auto=format&fit=crop&q=60', 1, 'active', TRUE);
 
 -- Insert well-structured lessons for English Basics course
 INSERT INTO lessons (course_id, title, content, order_number) VALUES
@@ -83,6 +104,25 @@ INSERT INTO lessons (course_id, title, content, order_number) VALUES
 (3, 'Research Methods', 'Conducting and documenting research.\n\nKey Topics:\n- Source evaluation\n- Citations\n- Bibliography\n- Avoiding plagiarism', 2),
 (3, 'Academic Style', 'Understanding academic writing conventions.\n\nKey Topics:\n- Formal language\n- Objective tone\n- Technical vocabulary\n- Style guides', 3);
 
+-- Insert lessons for the custom course
+INSERT INTO lessons (course_id, title, content, order_number) VALUES
+(4, 'Getting Started with JavaScript', 
+'Introduction to JavaScript programming language.\n\n
+Key Topics:\n
+- What is JavaScript\n
+- Setting up your development environment\n
+- Your first JavaScript program\n
+- Understanding variables and data types', 1),
+
+(4, 'JavaScript Functions', 
+'Learn how to create and use functions in JavaScript.\n\n
+Key Topics:\n
+- Function declaration vs expression\n
+- Function parameters and arguments\n
+- Return values\n
+- Arrow functions\n
+- Higher-order functions', 2);
+
 -- Insert sample exercises for Greetings lesson
 INSERT INTO exercises (lesson_id, question, correct_answer, exercise_type, points) VALUES
 (1, 'What is the appropriate greeting for morning?', 'Good morning', 'Multiple Choice', 10),
@@ -105,6 +145,13 @@ INSERT INTO exercises (lesson_id, question, correct_answer, exercise_type, point
 (8, 'What citation style is commonly used in humanities?', 'MLA', 'Multiple Choice', 15),
 (8, 'In academic writing, sources should be:', 'Peer-reviewed and credible', 'Multiple Choice', 15),
 (9, 'Choose the most appropriate academic phrase:', 'The research suggests that', 'Multiple Choice', 20);
+
+-- Add exercises for the custom course
+INSERT INTO exercises (lesson_id, question, correct_answer, exercise_type, points) VALUES
+(13, 'Which keyword is used to declare a variable in modern JavaScript?', 'let', 'Multiple Choice', 10),
+(13, 'Write a line of code to output "Hello World" to the console.', 'console.log("Hello World")', 'Fill in the blank', 15),
+(14, 'Write a function named "add" that takes two parameters and returns their sum.', 
+'function add(a, b) { return a + b; }', 'Writing', 20);
 
 -- Insert exercise options
 INSERT INTO exercise_options (exercise_id, option_text, is_correct) VALUES
@@ -155,6 +202,13 @@ INSERT INTO exercise_options (exercise_id, option_text, is_correct) VALUES
 (9, 'Python', FALSE),
 (9, 'HTML', FALSE),
 (9, 'JSON', FALSE);
+
+-- Add options for multiple choice question
+INSERT INTO exercise_options (exercise_id, option_text, is_correct) VALUES
+(16, 'let', TRUE),
+(16, 'variable', FALSE),
+(16, 'int', FALSE),
+(16, 'string', FALSE);
 
 -- Insert achievement data
 INSERT INTO achievements (achievement_id, title, description, icon, category, max_progress, rarity, requirements, rewards) VALUES
@@ -228,3 +282,7 @@ INSERT INTO achievement_history (user_id, achievement_id, action_type, old_value
 (2, 'perfect_score', 'progress', 0, 1),
 (2, 'perfect_score', 'unlock', 1, 1),
 (3, 'week_streak', 'progress', 5, 6);
+
+-- Enroll the creator in their own course
+INSERT INTO course_enrollments (user_id, course_id, enrolled_at) VALUES
+(1, 4, NOW());

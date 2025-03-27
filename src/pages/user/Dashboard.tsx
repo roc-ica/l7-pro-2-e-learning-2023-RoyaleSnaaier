@@ -16,6 +16,7 @@ const Dashboard: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { user } = useAuth();
+  const [createdCourses, setCreatedCourses] = useState<any[]>([]);
 
   const getProgressColor = (percentage: number) => {
     if (percentage >= 75) return 'bg-green-600';
@@ -127,6 +128,22 @@ const Dashboard: React.FC = () => {
     };
 
     fetchDashboardData();
+
+    // Fetch user's created courses
+    const fetchCreatedCourses = async () => {
+      if (!user?.id) return;
+      
+      try {
+        const response = await api.getUserCourses(user.id);
+        if (response.status === 'success') {
+          setCreatedCourses(response.courses || []);
+        }
+      } catch (err) {
+        console.error('Error fetching created courses:', err);
+      }
+    };
+    
+    fetchCreatedCourses();
   }, [user]);
 
   if (loading) return <LoadingSpinner />;
@@ -331,6 +348,75 @@ const Dashboard: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Courses you've created section */}
+      {createdCourses.length > 0 && (
+        <section className="mb-12">
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-2xl font-bold">Courses You've Created</h2>
+            <Link 
+              to="/create-course" 
+              className="flex items-center text-blue-600 hover:text-blue-800"
+            >
+              <svg className="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
+              </svg>
+              Create New Course
+            </Link>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {createdCourses.map(course => (
+              <div key={course.course_id} className="bg-white rounded-lg shadow-md overflow-hidden">
+                {course.image_url ? (
+                  <img 
+                    src={course.image_url} 
+                    alt={course.title} 
+                    className="w-full h-40 object-cover"
+                  />
+                ) : (
+                  <div className="h-40 bg-gradient-to-r from-blue-500 to-purple-600"></div>
+                )}
+                
+                <div className="p-5">
+                  <div className="flex justify-between items-start mb-2">
+                    <h3 className="text-xl font-semibold">{course.title}</h3>
+                    <span className={`px-2 py-1 text-xs rounded ${
+                      course.status === 'active' 
+                        ? 'bg-green-100 text-green-800' 
+                        : course.status === 'draft'
+                          ? 'bg-yellow-100 text-yellow-800'
+                          : 'bg-gray-100 text-gray-800'
+                    }`}>
+                      {course.status.charAt(0).toUpperCase() + course.status.slice(1)}
+                    </span>
+                  </div>
+                  
+                  <div className="flex justify-between text-sm text-gray-500 mb-4">
+                    <span>{course.total_lessons || 0} lessons</span>
+                    <span>{course.student_count || 0} students</span>
+                  </div>
+                  
+                  <div className="flex space-x-2">
+                    <Link
+                      to={`/course/${course.course_id}`}
+                      className="flex-1 py-2 text-center bg-blue-600 text-white rounded hover:bg-blue-700 text-sm"
+                    >
+                      View
+                    </Link>
+                    <Link
+                      to={`/manage-course/${course.course_id}`}
+                      className="flex-1 py-2 text-center border border-blue-600 text-blue-600 rounded hover:bg-blue-50 text-sm"
+                    >
+                      Manage
+                    </Link>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* Quick Actions */}
       <div className="flex space-x-4">

@@ -13,6 +13,9 @@ import LessonPage from './pages/learning/lesson_Page/LessonPage';
 import RoadmapPage from './pages/learning/roadmap_page/RoadmapPage';
 import CoursesPage from './pages/courses/CoursesPage';
 import CourseDetailPage from './pages/courses/CourseDetailPage';
+import CreateCoursePage from './pages/courses/CreateCoursePage';
+import CourseManagementPage from './pages/courses/CourseManagementPage';
+import LessonEditorPage from './pages/courses/LessonEditorPage';
 import PrivateRoute from './components/layout/PrivateRoute';
 import ProfilePage from './pages/profile/ProfilePage';
 import SettingsPage from './pages/profile/SettingsPage';
@@ -37,6 +40,12 @@ const App: React.FC = () => {
                   <Route path="/courses" element={<CoursesPage />} />
                   <Route path="/course/:courseId" element={<CourseDetailPage />} /> {/* Make sure this exists */}
                   <Route path="/courses/:courseId" element={<CourseDetailPage />} /> {/* Add this as fallback */}
+                  <Route path="/create-course" element={<PrivateRoute><CreateCoursePage /></PrivateRoute>} />
+                  
+                  {/* New routes for course management */}
+                  <Route path="/manage-course/:courseId" element={<PrivateRoute><CourseManagementPage /></PrivateRoute>} />
+                  <Route path="/lesson-editor/:lessonId" element={<PrivateRoute><LessonEditorPage /></PrivateRoute>} />
+                  
                   <Route path="/profile" element={<ProfilePage />} />
                   <Route path="/settings" element={<SettingsPage />} />
                   <Route path="/achievements" element={<Achievements />} />
