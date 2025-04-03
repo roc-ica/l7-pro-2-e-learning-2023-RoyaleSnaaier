@@ -66,7 +66,13 @@ const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
 // Course-related API calls
 const courseAPI = {
   getCourses: async () => {
-    const response = await fetch(`${API_BASE_URL}/api/courses/get_courses.php`);
+    const response = await fetch(`${API_BASE_URL}/api/courses/get_courses.php`, {
+      credentials: 'include',
+      mode: 'cors',  // Explicitly set the mode to CORS
+      headers: {
+        'Accept': 'application/json'
+      }
+    });
     return response.json();
   },
   
