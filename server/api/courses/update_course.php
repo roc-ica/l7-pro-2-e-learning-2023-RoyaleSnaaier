@@ -82,8 +82,10 @@ try {
     }
     
     if (isset($data['is_public'])) {
+        // Convert to integer (0 or 1) - important for boolean fields
+        $data['is_public'] = $data['is_public'] ? 1 : 0;
         $updateFields[] = "is_public = ?";
-        $params[] = (bool)$data['is_public'];
+        $params[] = $data['is_public'];
     }
     
     if (empty($updateFields)) {
