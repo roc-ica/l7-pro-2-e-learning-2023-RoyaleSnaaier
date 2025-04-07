@@ -4,7 +4,7 @@ import { useAuth } from './AuthContext';
 
 export interface Notification {
     id: number;
-    type: 'achievement' | 'system' | 'course_enrolled' | 'lesson_completed' | 'streak' | 'level_up' | 'welcome';
+    type: 'achievement' | 'system' | 'course_enrolled' | 'lesson_completed' | 'streak' | 'level_up' | 'welcome' | 'error' | 'success';
     message: string;
     description?: string;
     link?: string;
@@ -14,14 +14,14 @@ export interface Notification {
 }
 
 interface NotificationContextType {
-    showError: (message: string) => void;
-    showSuccess: (message: string) => void;
     notifications: Notification[];
     unreadCount: number;
     addNotification: (notification: Omit<Notification, 'id' | 'isRead' | 'timestamp'>) => void;
     addAchievementNotification: (achievement: Achievement) => void;
     addLevelUpNotification: (level: string) => void;
     addWelcomeNotification: (username: string) => void;
+    showError: (message: string) => void;
+    showSuccess: (message: string) => void;
     markAsRead: (id: number) => void;
     markAllAsRead: () => void;
     clearAll: () => void;
@@ -85,6 +85,20 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
         });
     };
 
+    const showError = (message: string) => {
+        addNotification({
+            type: 'error',
+            message: message
+        });
+    };
+
+    const showSuccess = (message: string) => {
+        addNotification({
+            type: 'success',
+            message: message
+        });
+    };
+
     const markAsRead = (id: number) => {
         setNotifications(prev => 
             prev.map(n => n.id === id ? { ...n, isRead: true } : n)
@@ -136,8 +150,8 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
             markAsRead,
             markAllAsRead,
             clearAll,
-            showError: (message: string) => addNotification({ type: 'system', message }),
-            showSuccess: (message: string) => addNotification({ type: 'system', message })
+            showError,
+            showSuccess
         }}>
             {children}
         </NotificationContext.Provider>

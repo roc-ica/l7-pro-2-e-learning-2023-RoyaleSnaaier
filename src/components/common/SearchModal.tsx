@@ -97,7 +97,7 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
         >
           <div className="flex flex-col items-center min-h-screen py-12 px-4 sm:px-6 lg:px-8">
             {/* Close button */}
-            <div className="w-full max-w-3xl flex justify-end mb-6">
+            <div className="w-full max-w-4xl flex justify-end mb-6">
               <button
                 onClick={onClose}
                 className="rounded-full p-2 text-white hover:bg-white hover:bg-opacity-20 transition-colors"
@@ -112,7 +112,7 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
               initial={{ y: -20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.1 }}
-              className="w-full max-w-3xl mb-12"
+              className="w-full max-w-4xl mb-12"
             >
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">

@@ -1,17 +1,20 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
+import { motion } from 'framer-motion';
+import { formatDistanceToNow } from 'date-fns';
+import { Notification } from '../../contexts/NotificationContext';
+import { 
+    BellIcon, 
+    CheckCircleIcon, 
+    AcademicCapIcon, 
+    InformationCircleIcon,
+    SpeakerWaveIcon,
+    ArrowPathIcon,
+    CheckIcon,
+    TrashIcon
+} from '@heroicons/react/24/outline';
 
-interface Notification {
-    id: number;
-    type: 'achievement' | 'system' | 'course_enrolled' | 'lesson_completed' | 'streak' | 'level_up' | 'welcome';
-    message: string;
-    description?: string;
-    link?: string;
-    isRead: boolean;
-    timestamp: string;
-}
-
-interface Props {
+interface NotificationsDropdownProps {
     isOpen: boolean;
     onClose: () => void;
     notifications: Notification[];
@@ -20,7 +23,7 @@ interface Props {
     onClearAll: () => void;
 }
 
-const NotificationsDropdown: React.FC<Props> = ({
+const NotificationsDropdown: React.FC<NotificationsDropdownProps> = ({
     isOpen,
     onClose,
     notifications,
@@ -28,142 +31,177 @@ const NotificationsDropdown: React.FC<Props> = ({
     onMarkAllAsRead,
     onClearAll
 }) => {
-    const [filter, setFilter] = useState<'all' | 'unread'>('all');
-    
     if (!isOpen) return null;
 
-    const filteredNotifications = filter === 'all' 
-        ? notifications 
-        : notifications.filter(n => !n.isRead);
+    const unreadCount = notifications.filter(n => !n.isRead).length;
+    const hasNotifications = notifications.length > 0;
 
+    // Get icon based on notification type
     const getIcon = (type: Notification['type']) => {
-        const iconStyles = {
-            achievement: 'text-yellow-500',
-            course_enrolled: 'text-green-500',
-            lesson_completed: 'text-blue-500',
-            streak: 'text-orange-500',
-            level_up: 'text-purple-500',
-            system: 'text-gray-500',
-            welcome: 'text-blue-500',
-        }[type];
+        switch (type) {
+            case 'achievement':
+                return <CheckCircleIcon className="h-5 w-5 text-green-500" />;
+            case 'course_enrolled':
+                return <AcademicCapIcon className="h-5 w-5 text-blue-500" />;
+            case 'lesson_completed':
+                return <CheckCircleIcon className="h-5 w-5 text-purple-500" />; 
+            case 'streak':
+            case 'level_up':
+                return <SpeakerWaveIcon className="h-5 w-5 text-yellow-500" />;
+            case 'error':
+                return <InformationCircleIcon className="h-5 w-5 text-red-500" />;
+            case 'success':
+                return <CheckIcon className="h-5 w-5 text-green-500" />;
+            case 'system':
+            case 'welcome':
+            default:
+                return <InformationCircleIcon className="h-5 w-5 text-gray-500" />;
+        }
+    };
 
-        const iconPaths = {
-            achievement: "M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z",
-            course_enrolled: "M12 14l9-5-9-5-9 5 9 5z M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z",
-            lesson_completed: "M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z",
-            streak: "M13 10V3L4 14h7v7l9-11h-7z",
-            level_up: "M13 7h8m0 0v8m0-8l-8 8-4-4-6 6",
-            system: "M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z",
-            welcome: "M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z",
-        }[type];
+    // Background color based on notification type
+    const getBackgroundColor = (type: Notification['type'], isRead: boolean) => {
+        if (isRead) return 'bg-gray-50';
+        
+        switch (type) {
+            case 'achievement':
+                return 'bg-green-50';
+            case 'course_enrolled':
+                return 'bg-blue-50';
+            case 'lesson_completed':
+                return 'bg-purple-50';
+            case 'streak':
+            case 'level_up':
+                return 'bg-yellow-50';
+            case 'error':
+                return 'bg-red-50';
+            case 'success':
+                return 'bg-green-50';
+            case 'system':
+            case 'welcome':
+            default:
+                return 'bg-gray-100';
+        }
+    };
 
-        return (
-            <div className={`p-2 rounded-full bg-opacity-20 ${iconStyles.replace('text-', 'bg-')}`}>
-                <svg className={`w-5 h-5 ${iconStyles}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d={iconPaths} />
-                </svg>
-            </div>
-        );
+    // Format notification date
+    const formatDate = (dateString: string) => {
+        try {
+            return formatDistanceToNow(new Date(dateString), { addSuffix: true });
+        } catch (e) {
+            return 'recently';
+        }
     };
 
     return (
-        <div className="absolute right-0 mt-2 w-96 bg-white rounded-lg shadow-xl py-1 z-50 border border-gray-100">
+        <div className="w-full max-h-[70vh] overflow-hidden flex flex-col">
             {/* Header */}
-            <div className="px-4 py-3 border-b border-gray-100">
-                <div className="flex justify-between items-center mb-2">
-                    <h3 className="text-lg font-semibold text-gray-900">Notifications</h3>
-                    <button
-                        onClick={onMarkAllAsRead}
-                        className="text-sm text-blue-600 hover:text-blue-800"
-                    >
-                        Mark all as read
-                    </button>
-                </div>
-                <div className="flex justify-between items-center">
-                    <div className="flex space-x-2">
-                        <button
-                            onClick={() => setFilter('all')}
-                            className={`px-3 py-1 rounded-full text-sm ${
-                                filter === 'all' 
-                                    ? 'bg-blue-100 text-blue-700' 
-                                    : 'text-gray-600 hover:bg-gray-100'
-                            }`}
-                        >
-                            All
-                        </button>
-                        <button
-                            onClick={() => setFilter('unread')}
-                            className={`px-3 py-1 rounded-full text-sm ${
-                                filter === 'unread' 
-                                    ? 'bg-blue-100 text-blue-700' 
-                                    : 'text-gray-600 hover:bg-gray-100'
-                            }`}
-                        >
-                            Unread
-                        </button>
-                    </div>
-                    <button
-                        onClick={onClearAll}
-                        className="text-sm text-gray-600 hover:text-red-600"
-                    >
-                        Clear all
-                    </button>
-                </div>
+            <div className="p-4 border-b border-gray-100 flex justify-between items-center">
+                <h3 className="font-semibold text-gray-800">Notifications</h3>
+                {unreadCount > 0 && (
+                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                        {unreadCount} new
+                    </span>
+                )}
             </div>
             
-            {/* Notifications List */}
-            <div className="max-h-[calc(100vh-200px)] overflow-y-auto">
-                {filteredNotifications.length === 0 ? (
-                    <div className="px-4 py-8 text-center text-gray-500">
-                        <svg className="w-12 h-12 mx-auto text-gray-400 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
-                        </svg>
-                        <p>No notifications found</p>
-                    </div>
-                ) : (
-                    filteredNotifications.map(notification => (
-                        <div
-                            key={notification.id}
-                            className={`px-4 py-3 hover:bg-gray-50 transition-colors cursor-pointer ${
-                                !notification.isRead ? 'bg-blue-50' : ''
-                            }`}
-                            onClick={() => onMarkAsRead(notification.id)}
-                        >
-                            <div className="flex items-start space-x-3">
-                                {getIcon(notification.type)}
-                                <div className="flex-1 min-w-0">
-                                    {notification.link ? (
-                                        <Link to={notification.link} className="text-sm font-medium text-gray-900 hover:text-blue-600">
+            {/* Action buttons */}
+            <div className="px-4 py-2 border-b border-gray-100 flex justify-between bg-gray-50">
+                <button
+                    onClick={onMarkAllAsRead}
+                    disabled={unreadCount === 0}
+                    className={`text-xs flex items-center ${
+                        unreadCount > 0 
+                            ? 'text-blue-600 hover:text-blue-800' 
+                            : 'text-gray-400 cursor-not-allowed'
+                    }`}
+                >
+                    <CheckIcon className="h-4 w-4 mr-1" />
+                    Mark all as read
+                </button>
+                <button
+                    onClick={onClearAll}
+                    disabled={!hasNotifications}
+                    className={`text-xs flex items-center ${
+                        hasNotifications 
+                            ? 'text-red-600 hover:text-red-800' 
+                            : 'text-gray-400 cursor-not-allowed'
+                    }`}
+                >
+                    <TrashIcon className="h-4 w-4 mr-1" />
+                    Clear all
+                </button>
+            </div>
+
+            {/* Notifications list */}
+            <div className="overflow-y-auto flex-grow">
+                {hasNotifications ? (
+                    <ul className="divide-y divide-gray-100">
+                        {notifications.map((notification) => (
+                            <motion.li
+                                key={notification.id}
+                                initial={{ opacity: 0.8 }}
+                                animate={{ opacity: 1 }}
+                                exit={{ opacity: 0, height: 0 }}
+                                className={`${getBackgroundColor(notification.type, notification.isRead)} transition-colors`}
+                            >
+                                <Link
+                                    to={notification.link || '#'}
+                                    className="px-4 py-3 flex items-start hover:bg-gray-50"
+                                    onClick={() => {
+                                        if (!notification.isRead) {
+                                            onMarkAsRead(notification.id);
+                                        }
+                                        onClose();
+                                    }}
+                                >
+                                    <div className="flex-shrink-0 pt-0.5">
+                                        {getIcon(notification.type)}
+                                    </div>
+                                    <div className="ml-3 w-0 flex-1">
+                                        <p className={`text-sm ${notification.isRead ? 'text-gray-600' : 'text-gray-900 font-medium'}`}>
                                             {notification.message}
-                                        </Link>
-                                    ) : (
-                                        <p className="text-sm font-medium text-gray-900">{notification.message}</p>
+                                        </p>
+                                        <p className="mt-1 text-xs text-gray-500">
+                                            {formatDate(notification.timestamp)}
+                                        </p>
+                                    </div>
+                                    {!notification.isRead && (
+                                        <div className="ml-3 flex-shrink-0 self-center">
+                                            <div className="h-2 w-2 rounded-full bg-blue-600"></div>
+                                        </div>
                                     )}
-                                    {notification.description && (
-                                        <p className="text-sm text-gray-600 mt-1">{notification.description}</p>
-                                    )}
-                                    <p className="text-xs text-gray-500 mt-1">
-                                        {new Date(notification.timestamp).toLocaleString()}
-                                    </p>
-                                </div>
-                                {!notification.isRead && (
-                                    <div className="w-2 h-2 rounded-full bg-blue-600"></div>
-                                )}
-                            </div>
-                        </div>
-                    ))
+                                </Link>
+                            </motion.li>
+                        ))}
+                    </ul>
+                ) : (
+                    <div className="p-8 text-center">
+                        <BellIcon className="mx-auto h-12 w-12 text-gray-300" />
+                        <h3 className="mt-2 text-sm font-medium text-gray-900">No notifications</h3>
+                        <p className="mt-1 text-sm text-gray-500">
+                            When you get notifications, they'll show up here.
+                        </p>
+                    </div>
                 )}
             </div>
 
             {/* Footer */}
-            <div className="px-4 py-2 border-t border-gray-100">
-                <button
-                    onClick={onClose}
-                    className="w-full text-center text-sm text-gray-600 hover:text-gray-800"
-                >
-                    Close
-                </button>
-            </div>
+            {hasNotifications && (
+                <div className="p-4 border-t border-gray-100 bg-gray-50 flex justify-center">
+                    <button
+                        onClick={() => {
+                            // In a real app, this would load more notifications
+                            // For now, we'll just close the dropdown
+                            onClose();
+                        }}
+                        className="text-sm text-blue-600 hover:text-blue-800 flex items-center"
+                    >
+                        <ArrowPathIcon className="h-4 w-4 mr-1" />
+                        Refresh notifications
+                    </button>
+                </div>
+            )}
         </div>
     );
 };
