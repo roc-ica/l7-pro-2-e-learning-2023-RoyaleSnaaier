@@ -490,7 +490,18 @@ const api = {
     },
 };
 
+const searchCourses = async (query: string) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/courses/search?q=${encodeURIComponent(query)}`);
+    return await response.json();
+  } catch (error) {
+    console.error('Error searching courses:', error);
+    return { status: 'error', message: 'Failed to search courses' };
+  }
+};
+
 export default {
   ...api,
   ...courseAPI,
+  searchCourses,
 };

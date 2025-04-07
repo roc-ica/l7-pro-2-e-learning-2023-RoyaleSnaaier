@@ -1,6 +1,7 @@
 import React from 'react';
 import { UserAchievement } from '../../../../types/Achievement';
 import { formatDistance } from 'date-fns';
+import { motion } from 'framer-motion';
 import { 
     TrophyIcon, 
     XMarkIcon,
@@ -60,25 +61,60 @@ const AchievementDetailsModal: React.FC<Props> = ({ achievement, open, onClose }
     const rewards = formatAchievementData(achievement.rewards);
 
     return (
-        <div className="fixed inset-0 z-50 overflow-y-auto">
-            <div className="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-                <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" onClick={onClose} />
+        <div className="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center">
+            <motion.div 
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm transition-opacity"
+                onClick={onClose}
+            />
 
-                <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full">
-                    {/* Header Section */}
-                    <div className="relative h-32 bg-gradient-to-r from-gray-800 to-gray-900">
-                        <button
-                            className="absolute top-4 right-4 text-white hover:text-gray-200"
-                            onClick={onClose}
+            <motion.div
+                initial={{ scale: 0.9, opacity: 0, y: 10 }}
+                animate={{ scale: 1, opacity: 1, y: 0 }}
+                exit={{ scale: 0.9, opacity: 0, y: 10 }}
+                transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                className="relative bg-white rounded-xl overflow-hidden shadow-2xl max-w-2xl w-full mx-4 my-8 max-h-[90vh] flex flex-col"
+                style={{ zIndex: 51 }} // Ensure modal is above backdrop
+            >
+                {/* Modal Header with Fixed Height */}
+                <div className="relative h-40 overflow-hidden flex-shrink-0">
+                    <div 
+                        className="absolute inset-0 bg-gradient-to-r"
+                        style={{ 
+                            backgroundImage: `linear-gradient(to right, ${rarityColors[achievement.rarity]}cc, ${rarityColors[achievement.rarity]})`
+                        }}
+                    >
+                        {/* Decorative pattern overlay */}
+                        <div className="absolute inset-0 opacity-10">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%">
+                                <defs>
+                                    <pattern id="smallGrid" width="20" height="20" patternUnits="userSpaceOnUse">
+                                        <path d="M 20 0 L 0 0 0 20" fill="none" stroke="white" strokeWidth="1"/>
+                                    </pattern>
+                                </defs>
+                                <rect width="100%" height="100%" fill="url(#smallGrid)" />
+                            </svg>
+                        </div>
+                    </div>
+
+                    <button
+                        className="absolute top-4 right-4 text-white hover:text-gray-200 bg-black bg-opacity-20 rounded-full p-1 transition-colors"
+                        onClick={onClose}
+                    >
+                        <XMarkIcon className="h-6 w-6" />
+                    </button>
+
+                    {/* Achievement Icon */}
+                    <div className="absolute bottom-15 left-0 transform translate-y-1/2 ml-8">
+                        <div 
+                            className="w-24 h-24 rounded-xl bg-white flex items-center justify-center shadow-lg p-2"
                         >
-                            <XMarkIcon className="h-6 w-6" />
-                        </button>
-                        <div className="absolute -bottom-10 left-6 p-2 bg-white rounded-xl shadow-lg">
-                            <div 
-                                className="w-20 h-20 rounded-lg flex items-center justify-center"
+                            <div
+                                className="w-full h-full rounded-lg flex items-center justify-center"
                                 style={{ 
-                                    backgroundColor: `${rarityColors[achievement.rarity]}15`,
-                                    border: `2px solid ${rarityColors[achievement.rarity]}`
+                                    background: `linear-gradient(135deg, ${rarityColors[achievement.rarity]}60, ${rarityColors[achievement.rarity]}20)`
                                 }}
                             >
                                 <TrophyIcon 
@@ -87,145 +123,175 @@ const AchievementDetailsModal: React.FC<Props> = ({ achievement, open, onClose }
                                 />
                             </div>
                         </div>
-                        <div className="absolute bottom-4 left-36 text-white">
-                            <h2 className="text-2xl font-bold">{achievement.title}</h2>
-                            <div className="flex gap-2 mt-1">
-                                <span 
-                                    className="px-2 py-1 rounded-full text-xs font-medium"
-                                    style={{ backgroundColor: rarityColors[achievement.rarity] }}
-                                >
-                                    {achievement.rarity.toUpperCase()}
-                                </span>
-                                <span className="px-2 py-1 rounded-full text-xs font-medium bg-white/20">
-                                    {achievement.category}
-                                </span>
-                            </div>
-                        </div>
                     </div>
 
-                    {/* Content Section */}
-                    <div className="px-6 pt-16 pb-6">
-                        <div className="grid grid-cols-2 gap-6 mb-8">
-                            <div className="col-span-2 bg-gray-50 rounded-lg p-4">
-                                <p className="text-gray-700">{achievement.description}</p>
-                            </div>
-
-                            {/* Stats Cards */}
-                            <div className="bg-blue-50 rounded-lg p-4">
-                                <div className="flex items-start gap-3">
-                                    <ArrowUpIcon className="h-5 w-5 text-blue-500 mt-1" />
-                                    <div>
-                                        <h4 className="font-medium text-blue-900">Progress</h4>
-                                        <p className="text-2xl font-bold text-blue-600">
-                                            {Math.round((achievement.progress / achievement.max_progress) * 100)}%
-                                        </p>
-                                        <p className="text-sm text-blue-600">
-                                            {achievement.progress} / {achievement.max_progress} completed
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="bg-orange-50 rounded-lg p-4">
-                                <div className="flex items-start gap-3">
-                                    <FireIcon className="h-5 w-5 text-orange-500 mt-1" />
-                                    <div>
-                                        <h4 className="font-medium text-orange-900">Rarity Score</h4>
-                                        <p className="text-2xl font-bold text-orange-600">
-                                            {achievement.rarity === 'legendary' ? 'S+' :
-                                             achievement.rarity === 'epic' ? 'A' :
-                                             achievement.rarity === 'rare' ? 'B' : 'C'}
-                                        </p>
-                                        <p className="text-sm text-orange-600">
-                                            {achievement.rarity.charAt(0).toUpperCase() + achievement.rarity.slice(1)} Achievement
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Requirements and Rewards */}
-                            <div className="col-span-2 grid grid-cols-2 gap-6">
-                                <div className="bg-indigo-50 rounded-lg p-4">
-                                    <h4 className="text-lg font-medium flex items-center gap-2 text-indigo-900 mb-3">
-                                        <CheckCircleIcon className="h-5 w-5 text-indigo-500" />
-                                        Requirements
-                                    </h4>
-                                    <ul className="space-y-2">
-                                        {requirements.map((req, index) => (
-                                            <li key={index} className="flex items-start gap-2">
-                                                <span className="flex-shrink-0 w-5 h-5 rounded-full bg-indigo-200 flex items-center justify-center text-indigo-700 text-sm">
-                                                    {index + 1}
-                                                </span>
-                                                <span className="text-indigo-700">{req}</span>
-                                            </li>
-                                        ))}
-                                    </ul>
-                                </div>
-
-                                <div className="bg-amber-50 rounded-lg p-4">
-                                    <h4 className="text-lg font-medium flex items-center gap-2 text-amber-900 mb-3">
-                                        <StarIcon className="h-5 w-5 text-amber-500" />
-                                        Rewards
-                                    </h4>
-                                    <ul className="space-y-2">
-                                        {rewards.map((reward, index) => (
-                                            <li key={index} className="flex items-start gap-2">
-                                                <span className="flex-shrink-0 w-5 h-5 rounded-full bg-amber-200 flex items-center justify-center text-amber-700 text-sm">
-                                                    ★
-                                                </span>
-                                                <span className="text-amber-700">{reward}</span>
-                                            </li>
-                                        ))}
-                                    </ul>
-                                </div>
-                            </div>
-
-                            {/* Unlock Status */}
-                            {isUnlocked ? (
-                                <div className="col-span-2 bg-green-50 rounded-lg p-4">
-                                    <div className="flex items-center gap-4">
-                                        <div className="flex-shrink-0 w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
-                                            <TrophyIcon className="h-6 w-6 text-green-500" />
-                                        </div>
-                                        <div>
-                                            <h4 className="text-lg font-medium text-green-900">Achievement Unlocked!</h4>
-                                            <div className="flex items-center gap-4 mt-1">
-                                                <div className="flex items-center text-green-700">
-                                                    <CalendarIcon className="h-4 w-4 mr-1" />
-                                                    <span className="text-sm">
-                                                        {new Date(achievement.unlocked_at!).toLocaleDateString()}
-                                                    </span>
-                                                </div>
-                                                <div className="flex items-center text-green-700">
-                                                    <ClockIcon className="h-4 w-4 mr-1" />
-                                                    <span className="text-sm">
-                                                        {formatDistance(new Date(achievement.unlocked_at!), new Date(), { addSuffix: true })}
-                                                    </span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            ) : (
-                                <div className="col-span-2">
-                                    <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
-                                        <div 
-                                            className="h-full transition-all duration-500"
-                                            style={{ 
-                                                width: `${progress}%`,
-                                                backgroundColor: rarityColors[achievement.rarity]
-                                            }}
-                                        />
-                                    </div>
-                                    <p className="text-right mt-1 text-sm text-gray-600">
-                                        {achievement.progress} / {achievement.max_progress} progress
-                                    </p>
-                                </div>
-                            )}
+                    {/* Achievement Title */}
+                    <div className="absolute bottom-4 left-36 text-white">
+                        <h2 className="text-2xl font-bold">{achievement.title}</h2>
+                        <div className="flex gap-2 mt-1">
+                            <span 
+                                className="px-2 py-1 rounded-full text-xs font-medium shadow-sm bg-white bg-opacity-20 backdrop-filter backdrop-blur-sm"
+                            >
+                                {achievement.rarity.toUpperCase()}
+                            </span>
+                            <span className="px-2 py-1 rounded-full text-xs font-medium bg-white bg-opacity-20 backdrop-filter backdrop-blur-sm">
+                                {achievement.category}
+                            </span>
                         </div>
                     </div>
                 </div>
-            </div>
+
+                {/* Modal Content with Scrollable Area */}
+                <div className="flex-1 overflow-y-auto p-6 pt-6">
+                    <div className="bg-indigo-50 rounded-xl p-4 mb-6">
+                        <p className="text-gray-700">{achievement.description}</p>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                        {/* Progress Card */}
+                        <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-5 shadow-sm border border-blue-100">
+                            <div className="flex items-start gap-3">
+                                <div className="p-2 rounded-lg bg-blue-100">
+                                    <ArrowUpIcon className="h-5 w-5 text-blue-600" />
+                                </div>
+                                <div>
+                                    <h4 className="font-semibold text-blue-800">Progress</h4>
+                                    <p className="text-2xl font-bold text-blue-600 mt-1">
+                                        {Math.round((achievement.progress / achievement.max_progress) * 100)}%
+                                    </p>
+                                    <p className="text-sm text-blue-600">
+                                        {achievement.progress} / {achievement.max_progress} completed
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Rarity Card */}
+                        <div className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-xl p-5 shadow-sm border border-amber-100">
+                            <div className="flex items-start gap-3">
+                                <div className="p-2 rounded-lg bg-amber-100">
+                                    <FireIcon className="h-5 w-5 text-amber-600" />
+                                </div>
+                                <div>
+                                    <h4 className="font-semibold text-amber-800">Rarity</h4>
+                                    <p className="text-2xl font-bold text-amber-600 mt-1">
+                                        {achievement.rarity === 'legendary' ? 'Legendary' :
+                                         achievement.rarity === 'epic' ? 'Epic' :
+                                         achievement.rarity === 'rare' ? 'Rare' : 'Common'}
+                                    </p>
+                                    <div className="flex mt-1">
+                                        {Array.from({length: 
+                                            achievement.rarity === 'legendary' ? 4 :
+                                            achievement.rarity === 'epic' ? 3 :
+                                            achievement.rarity === 'rare' ? 2 : 1
+                                        }).map((_, i) => (
+                                            <StarIcon key={i} className="h-4 w-4 text-amber-500 fill-current" />
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Requirements and Rewards */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                        <div className="bg-gradient-to-br from-indigo-50 to-blue-50 rounded-xl shadow-sm border border-indigo-100 p-5">
+                            <h4 className="text-lg font-semibold flex items-center gap-2 text-indigo-700 mb-4">
+                                <CheckCircleIcon className="h-5 w-5 text-indigo-500" />
+                                Requirements
+                            </h4>
+                            <ul className="space-y-3">
+                                {requirements.map((req, index) => (
+                                    <li key={index} className="flex items-start gap-3 bg-white p-3 rounded-lg shadow-sm">
+                                        <span className="flex-shrink-0 w-6 h-6 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 text-sm font-medium">
+                                            {index + 1}
+                                        </span>
+                                        <span className="text-gray-700">{req}</span>
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+
+                        <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl shadow-sm border border-purple-100 p-5">
+                            <h4 className="text-lg font-semibold flex items-center gap-2 text-purple-700 mb-4">
+                                <StarIcon className="h-5 w-5 text-purple-500" />
+                                Rewards
+                            </h4>
+                            <ul className="space-y-3">
+                                {rewards.map((reward, index) => (
+                                    <li key={index} className="flex items-start gap-3 bg-white p-3 rounded-lg shadow-sm">
+                                        <span className="flex-shrink-0 w-6 h-6 rounded-full bg-purple-100 flex items-center justify-center text-purple-700 text-sm">
+                                            ★
+                                        </span>
+                                        <span className="text-gray-700">{reward}</span>
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+                    </div>
+
+                    {/* Unlock Status */}
+                    {isUnlocked ? (
+                        <div className="bg-gradient-to-r from-green-500 to-emerald-600 rounded-xl p-5 text-white">
+                            <div className="flex items-center gap-4">
+                                <div className="flex-shrink-0 w-12 h-12 bg-white bg-opacity-20 backdrop-blur-sm rounded-lg flex items-center justify-center">
+                                    <TrophyIcon className="h-6 w-6 text-white" />
+                                </div>
+                                <div>
+                                    <h4 className="text-lg font-medium">Achievement Unlocked!</h4>
+                                    <div className="flex items-center gap-6 mt-1">
+                                        <div className="flex items-center text-green-100">
+                                            <CalendarIcon className="h-4 w-4 mr-1" />
+                                            <span className="text-sm">
+                                                {new Date(achievement.unlocked_at!).toLocaleDateString()}
+                                            </span>
+                                        </div>
+                                        <div className="flex items-center text-green-100">
+                                            <ClockIcon className="h-4 w-4 mr-1" />
+                                            <span className="text-sm">
+                                                {formatDistance(new Date(achievement.unlocked_at!), new Date(), { addSuffix: true })}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    ) : (
+                        <div className="bg-gradient-to-r from-gray-100 to-gray-200 rounded-xl p-5">
+                            <h4 className="text-lg font-medium text-gray-700 mb-3">Progress Tracker</h4>
+                            <div className="h-3 bg-gray-300 rounded-full overflow-hidden">
+                                <motion.div 
+                                    initial={{ width: 0 }}
+                                    animate={{ width: `${progress}%` }}
+                                    transition={{ duration: 0.8 }}
+                                    className="h-full"
+                                    style={{ 
+                                        background: `linear-gradient(to right, ${rarityColors[achievement.rarity]}aa, ${rarityColors[achievement.rarity]})`
+                                    }}
+                                />
+                            </div>
+                            <div className="flex justify-between mt-2">
+                                <p className="text-sm text-gray-600">
+                                    {achievement.progress} of {achievement.max_progress} complete
+                                </p>
+                                <p className="text-sm font-medium text-gray-700">
+                                    {Math.round(progress)}% to unlock
+                                </p>
+                            </div>
+                        </div>
+                    )}
+                </div>
+
+                {/* Footer Actions - Fixed at bottom */}
+                <div className="border-t border-gray-200 p-4 bg-gray-50 flex-shrink-0">
+                    <button
+                        onClick={onClose}
+                        className="w-full inline-flex justify-center items-center px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-base font-medium rounded-md shadow-sm hover:from-blue-700 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+                    >
+                        Close
+                    </button>
+                </div>
+            </motion.div>
         </div>
     );
 };
