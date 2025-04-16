@@ -488,6 +488,23 @@ const api = {
         });
         return response.json();
     },
+
+    // Add function to complete a lesson
+    completeLesson: async (userId: number, lessonId: number): Promise<any> => {
+        const response = await fetch(`${API_BASE_URL}/api/lessons/complete_lesson.php`, {
+            method: 'POST',
+            headers: { 
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest' // Add this to prevent page reload
+            },
+            body: JSON.stringify({ user_id: userId, lesson_id: lessonId }),
+            credentials: 'include',
+            mode: 'cors',
+            cache: 'no-store' // Prevent caching
+        });
+        return response.json();
+    }
 };
 
 const searchCourses = async (query: string) => {

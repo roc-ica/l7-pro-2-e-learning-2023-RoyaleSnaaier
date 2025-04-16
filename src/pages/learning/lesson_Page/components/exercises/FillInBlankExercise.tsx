@@ -100,6 +100,25 @@ const FillInBlankExercise: React.FC<Props> = ({
     }
   };
 
+  // Handle input blur (when focus leaves the input)
+  const handleBlur = (e: React.FocusEvent) => {
+    // Only submit if there's an answer and the answer hasn't been submitted yet
+    if (answer.trim() && !isSubmitted && !hasAttempted && !submittedRef.current) {
+      // Lock the answer permanently
+      setHasAttempted(true);
+      setIsSubmitted(true);
+      submittedRef.current = true;
+      
+      // Disable the input
+      if (inputRef.current) {
+        inputRef.current.disabled = true;
+      }
+      
+      // Submit the answer to parent component
+      onSubmit(answer.trim());
+    }
+  };
+
   // Handle form submission (either through Enter key or submit button)
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -159,6 +178,7 @@ const FillInBlankExercise: React.FC<Props> = ({
               type="text"
               value={answer}
               onChange={handleInputChange}
+              onBlur={handleBlur} // Add blur handler
               disabled={disabled || isSubmitted || hasAttempted}
               placeholder="Type your answer here..."
               className={`w-full px-4 py-3 border rounded-lg focus:outline-none transition-colors
@@ -261,7 +281,8 @@ const FillInBlankExercise: React.FC<Props> = ({
       {/* Show the one-attempt notice only if user hasn't submitted yet */}
       {!(isSubmitted || hasAttempted) && (
         <div className="text-xs text-gray-500 italic">
-          You only have one attempt for this exercise, so think carefully before submitting.
+          You only have one attempt for this exercise. Your answer will be submitted when you press Enter, 
+          click the Submit button, or move away from the input field.
         </div>
       )}
     </div>

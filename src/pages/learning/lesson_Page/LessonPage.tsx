@@ -121,9 +121,9 @@ const LessonPage: React.FC = () => {
     // Handle submitting an answer to an exercise
     const handleSubmitAnswer = async (answer: string) => {
         if (!user?.id || !lesson) return;
-        
+
         const currentExercise = lesson.exercises[currentExerciseIndex];
-        
+
         try {
             // Submit the answer to the API
             const response = await api.submitExercise({
@@ -131,31 +131,67 @@ const LessonPage: React.FC = () => {
                 user_id: user.id,
                 answer
             });
-            
-            if (response.status === 'success') {
-                // Store the result locally, always track the exercise as attempted
-                const isCorrect = response.result.is_correct;
-                setExerciseResults(prev => ({
+
+            // Mark the exercise as attempted regardless of correctness
+            setExerciseResults(prev => {
+                const updated = {
                     ...prev,
-                    [currentExercise.exercise_id]: isCorrect
-                }));
-                
-                setAnsweredExercise(currentExercise.exercise_id);
-                setIsAnswerCorrect(isCorrect);
-                
-                // Show notification based on result
-                if (isCorrect) {
+                    [currentExercise.exercise_id]: true // Always set to true (attempted)
+                };
+
+                // Check if this was the last exercise and all are now attempted
+                const allDone =
+                    lesson.exercises.length > 0 &&
+                    lesson.exercises.every(ex => 
+                        ex.exercise_id === currentExercise.exercise_id
+                            ? true
+                            : updated[ex.exercise_id] === true
+                    );
+
+                if (allDone) {
+                    setIsLessonComplete(true);
+                }
+
+                return updated;
+            });
+
+            setAnsweredExercise(currentExercise.exercise_id);
+            setIsAnswerCorrect(response.status === 'success' ? response.result.is_correct : null);
+
+            // Show notification based on result
+            if (response.status === 'success') {
+                if (response.result.is_correct) {
                     notifications.showSuccess('Correct answer!');
                 } else {
                     notifications.showError('Incorrect answer.');
                 }
+            } else {
+                notifications.showError('Failed to submit answer. Please try again.');
             }
         } catch (err) {
             console.error('Error submitting answer:', err);
             notifications.showError('Failed to submit answer. Please try again.');
+            // Still mark as attempted and check for completion
+            setExerciseResults(prev => {
+                const updated = {
+                    ...prev,
+                    [currentExercise.exercise_id]: true
+                };
+                const allDone =
+                    lesson.exercises.length > 0 &&
+                    lesson.exercises.every(ex => 
+                        ex.exercise_id === currentExercise.exercise_id
+                            ? true
+                            : updated[ex.exercise_id] === true
+                    );
+                if (allDone) {
+                    setIsLessonComplete(true);
+                }
+                return updated;
+            });
         }
     };
-    
+
     // Handle moving to the next exercise
     const handleNextExercise = () => {
         if (!lesson) return;
@@ -272,16 +308,16 @@ const LessonPage: React.FC = () => {
                 onBack={handleBackToResults}
             />
         );
-    }
+    }        
 
-    if (isLessonComplete && completion) {
+    if (isLessonComplete) {
         return (
             <LessonComplete
-                totalExercises={completion.total_exercises}
-                correctAnswers={completion.correct_answers}
-                totalPoints={completion.total_points}
-                lessonTitle={completion.lesson_title}
-                nextLessonId={completion.next_lesson_id}
+                totalExercises={completion?.total_exercises || lesson?.exercises.length || 0}
+                correctAnswers={completion?.correct_answers || Object.values(exerciseResults).filter(Boolean).length}
+                totalPoints={completion?.total_points || 0}
+                lessonTitle={completion?.lesson_title || lesson?.title || ''}
+                nextLessonId={completion?.next_lesson_id || null}
                 onNextLesson={handleNextLesson}
                 onReviewLesson={handleReviewLesson}
             />
@@ -296,18 +332,18 @@ const LessonPage: React.FC = () => {
             
             <div className="bg-white rounded-lg shadow-md p-6 mb-8">
                 {lesson.exercises && lesson.exercises.length > 0 ? (
-                    <LessonExercise
-                        exercises={lesson.exercises}
-                        currentExerciseIndex={currentExerciseIndex}
-                        exerciseResults={exerciseResults}
-                        answeredExercise={answeredExercise}
-                        isAnswerCorrect={isAnswerCorrect}
-                        exerciseHistory={completion?.exercise_history}
-                        isLastExercise={currentExerciseIndex === lesson.exercises.length - 1}
-                        onExerciseSelect={setCurrentExerciseIndex}
-                        onSubmitAnswer={handleSubmitAnswer}
-                        onNextExercise={handleNextExercise}
-                    />
+                        <LessonExercise
+                            exercises={lesson.exercises}
+                            currentExerciseIndex={currentExerciseIndex}
+                            exerciseResults={exerciseResults}
+                            answeredExercise={answeredExercise}
+                            isAnswerCorrect={isAnswerCorrect}
+                            exerciseHistory={completion?.exercise_history}
+                            isLastExercise={currentExerciseIndex === lesson.exercises.length - 1}
+                            onExerciseSelect={setCurrentExerciseIndex}
+                            onSubmitAnswer={handleSubmitAnswer}
+                            onNextExercise={handleNextExercise}
+                        />
                 ) : (
                     <div className="text-center py-8 text-gray-500">
                         No exercises available for this lesson.
