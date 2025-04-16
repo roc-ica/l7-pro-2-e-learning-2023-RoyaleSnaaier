@@ -100,12 +100,6 @@ const LearningPathSection: React.FC = () => {
                             >
                                 View Your Roadmap
                             </Link>
-                            <Link
-                                to="/assessment"
-                                className="px-8 py-3 border-2 border-blue-600 text-blue-600 rounded-lg hover:bg-blue-50 transition-colors"
-                            >
-                                Take Assessment Test
-                            </Link>
                         </motion.div>
                     </div>
                 </div>
